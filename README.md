@@ -1,5 +1,8 @@
 BayesianOptimization.jl
 =========================
+[![Build Status](https://travis-ci.org/invenia/BayesianOptimization.jl.svg?branch=master)](https://travis-ci.org/invenia/BayesianOptimization.jl)
+[![codecov.io](https://codecov.io/github/invenia/BayesianOptimization.jl/coverage.svg?branch=master)](https://codecov.io/github/invenia/BayesianOptimization.jl?branch=master)
+
 A julia package for bayesian optimization of black box functions.
 
 
