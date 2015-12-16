@@ -1,4 +1,4 @@
-include("../src/BayesianOptimization.jl")
+#include("../src/BayesianOptimization.jl")
 using BayesianOptimization
 
 function foo(a, b)
