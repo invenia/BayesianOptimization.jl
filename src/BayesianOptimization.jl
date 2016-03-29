@@ -69,7 +69,7 @@ Args:
 Returns:
 - `BayesOpt`: a new `BayesOpt` instance.
 """
-function BayesOpt{T<:AbstractArray}(f::Function, bounds::T...)
+function BayesOpt{T<:AbstractArray}(f::Function, bounds::T...; noise=-1e8)
     # Initialize our parameters matrix
     X = Array{Float64}(length(bounds), 1)
 
@@ -89,7 +89,7 @@ function BayesOpt{T<:AbstractArray}(f::Function, bounds::T...)
     # Gaussian Process arguments.
     BayesOpt(
         f, X, y, xmax, ymax, collect(bounds),
-        GP(X[:,1:1], y[1:1], MeanZero(), SE(0.0, 0.0))
+        GP(X[:,1:1], y[1:1], MeanZero(), SE(0.0, 0.0), noise)
     )
 end
 
@@ -101,12 +101,13 @@ Args:
 - `opt`: the `BayesOpt` type to optimize
 - `iter`: the number of iterations to run the optimization loop
 - `restarts`: the number of restarts to allow in the acquisition function.
+- `noise` : log of the observation noise, default no observation noise
 
 Returns:
 - `Array{Real}(nparams, 1)`: the best params found for `f`
 - `Real`: the best result found.
 """
-function optimize!(opt::BayesOpt, iter=100, restarts=10)
+function optimize!(opt::BayesOpt, iter=100, restarts=10; noise=-1e8)
     # The last index we looked at is equal to the current number of
     # observation looked at.
     last_index = length(opt.y) + 1
@@ -139,7 +140,7 @@ function optimize!(opt::BayesOpt, iter=100, restarts=10)
         # GaussianProcesses.update_mll!(opt.model)
 
         # Just rebuild the model cause apparently the above complains if we update with more data.
-        opt.model = GP(opt.X[:,1:i], opt.y[1:i], MeanZero(), SE(0.0, 0.0))
+        opt.model = GP(opt.X[:,1:i], opt.y[1:i], MeanZero(), SE(0.0, 0.0), noise)
 
         # Update the max x and y if our new
         # result is better.
@@ -165,18 +166,19 @@ Args:
 - `bounds`: a collection of bounds (1 per parameter) to direct the search.
 - `iter`: the number of iterations to run the optimization loop
 - `restarts`: the number of restarts to allow in the acquisition function.
+- `noise` : log of the observation noise, default no observation noise
 
 Returns:
 - `Array{Real}(nparams, 1)`: the best params found for `f`
 - `Real`: the best result found.
 - `BayesOpt`: a new `BayesOpt` instance.
 """
-function optimize{T<:AbstractArray}(f::Function, bounds::T...; iter=100, restarts=10)
+function optimize{T<:AbstractArray}(f::Function, bounds::T...; iter=100, restarts=10, noise=-1e8)
     # Create out BayesOpt instance
-    opt = BayesOpt(f, bounds...)
+    opt = BayesOpt(f, bounds...; noise=noise)
 
     # call `optimize!` for it.
-    optimize!(opt, iter, restarts)
+    optimize!(opt, iter, restarts; noise=noise)
 
     # return the x and y maximums like `optimize!` along with the
     # BayesOpt instance.
