@@ -5,6 +5,8 @@ os:
   - linux
 julia:
   - 0.4
+  - 0.5
+  # - latest  # Not working yet.
 notifications:
   email: false
 script:
